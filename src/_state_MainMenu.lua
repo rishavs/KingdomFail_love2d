@@ -27,9 +27,7 @@ end
 function _state_MainMenu:keyreleased(key)
     if key == 'return' then
         Gamestate.switch(_state_Settings)
-    end    
-    
-    if key == 'escape' then
+    elseif key == 'escape' then
         love.event.quit()
     end
 end
