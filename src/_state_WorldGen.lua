@@ -10,24 +10,22 @@ local slider = {value = 3000, min = 1000, max = 9999}
 -- State Definition: _state_WorldGen
 ------------------------------------------------
 function _state_WorldGen:init()
-
+    GUI:init()
 end
 
 function _state_WorldGen:draw()
+    love.graphics.print("State: _state_WorldGen", scrWidth-300, 10)
 
-
-    UI.draw()
+    GUI:draw()
 end
 
 function _state_WorldGen:update(dt)
-    if UI.Button("Menu", 10, 20, 100,30).hit then
-        Gamestate.switch(_state_MainMenu)
-    end
-    
+
+    GUI:update()
 
 
-    UI.Slider(slider, 100,100, 200,20)
-    UI.Label("Seed = " .. tostring(Utils.round(slider.value)), 300,100, 200,20)
+    -- UI.Slider(slider, 100,100, 200,20)
+    -- UI.Label("Seed = " .. tostring(Utils.round(slider.value)), 300,100, 200,20)
 
 end
 

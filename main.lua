@@ -10,10 +10,14 @@ Inspect = require 'libs.inspect.inspect'
 ------------------------------------------------
 -- Componants
 ------------------------------------------------
-Utils = require "src.Utils"
+
+
 _state_MainMenu = require "src._state_MainMenu"
 _state_Settings = require "src._state_Settings"
 _state_WorldGen = require "src._state_WorldGen"
+
+GUI = require "src.GUI"
+Utils = require "src.Utils"
 
 ------------------------------------------------
 -- Declarations
