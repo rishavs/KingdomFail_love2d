@@ -11,13 +11,9 @@ Inspect = require 'libs.inspect.inspect'
 -- Componants
 ------------------------------------------------
 
-
 _state_MainMenu = require "src._state_MainMenu"
 _state_Settings = require "src._state_Settings"
 _state_WorldGen = require "src._state_WorldGen"
-
-GUI = require "src.GUI"
-Utils = require "src.Utils"
 
 ------------------------------------------------
 -- Declarations
@@ -30,9 +26,10 @@ scrHeight = love.graphics.getHeight()
 -- Base functions
 ------------------------------------------------
 function love.load()
+    love.math.setRandomSeed(os.time())
+
     Gamestate.registerEvents()
     Gamestate.switch(_state_MainMenu)
-
 end
 
 function love.quit()
