@@ -77,7 +77,7 @@ function GUI:update(dt)
             Gamestate.switch(_state_MainMenu)
         elseif seed_btn.hit then
             seed = Map.generate_seed()
-
+            map_obj = Map.generate_map(seed, grid_size, cell_size)
         end
     end
 
