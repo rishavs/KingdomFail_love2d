@@ -18,23 +18,31 @@ grid_size = "M"
 
 map_obj = {}
 
+local stime, ttime
+
 ------------------------------------------------
 -- State Definition: _state_WorldGen
 ------------------------------------------------
 function _state_WorldGen:init()
+    stime = love.timer.getTime()
+
     map_obj = Map.generate_map(seed, grid_size, cell_size)
     GUI:init()
     HUD:init()
+
+    ttime = (love.timer.getTime() - stime)
 end
 
 function _state_WorldGen:draw()
-    love.graphics.setColor(50, 50, 50)
 
     for id, sqr in pairs(map_obj) do
         -- love.graphics.points(sqr.center.x, sqr.center.y)
         love.graphics.setColor(sqr.lum, sqr.lum, sqr.lum)
         love.graphics.rectangle('fill', sqr.vertices[1], sqr.vertices[2], cell_size, cell_size)
     end
+
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.print("Time taken : "..tostring(Utils.round(ttime, 1)) .. " seconds", 10, 70)
 
     GUI:draw()
     HUD:draw()
@@ -49,8 +57,13 @@ function _state_WorldGen:mousepressed(x, y, button)
     if button == 1 then
         print("Mouse clicked at : ".. x .. ", " .. y)
         local g_width, g_height = Map.set_sqr_grid_size(grid_size)
-        print(Map.get_sqr_grid_coords_from_world_coords(x, y, g_width, g_height, cell_size))
-        -- print(Inspect(map_obj))
+        local g_coords = Map.get_sqr_grid_coords_from_world_coords(x, y, g_width, g_height, cell_size)
+        if g_coords then
+            print('Grid coords = ' .. g_coords.w .. ", " .. g_coords.h)
+            print('Cell Details :')
+            print(Inspect(map_obj[g_coords.w .. "w" .. g_coords.h .. "h"]))
+            -- print(Inspect(map_obj))
+        end
     elseif button == 2 then
         print()
 
@@ -61,6 +74,7 @@ function _state_WorldGen:keyreleased(key)
     if key == 'return' then
         Gamestate.switch(_state_MainMenu)
     elseif key == 'space' then
+        seed = Map.generate_seed()
         map_obj = Map.generate_map(seed, grid_size, cell_size)
     end
 end
