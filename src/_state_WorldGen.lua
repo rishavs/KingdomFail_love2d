@@ -36,9 +36,11 @@ end
 function _state_WorldGen:draw()
 
     for id, sqr in pairs(map_obj) do
-        -- love.graphics.points(sqr.center.x, sqr.center.y)
-        love.graphics.setColor(sqr.lum, sqr.lum, sqr.lum)
-        love.graphics.rectangle('fill', sqr.vertices[1], sqr.vertices[2], cell_size, cell_size)
+        if sqr.biome == 'land' then
+            -- love.graphics.points(sqr.center.x, sqr.center.y)
+            love.graphics.setColor(sqr.color.r, sqr.color.g, sqr.color.b)
+            love.graphics.rectangle('fill', sqr.vertices[1], sqr.vertices[2], cell_size, cell_size)
+        end
     end
 
     love.graphics.setColor(0, 0, 0)

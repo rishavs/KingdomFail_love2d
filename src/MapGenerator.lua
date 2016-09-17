@@ -209,6 +209,17 @@ function MapGenerator.set_biomes(map_biome_obj, grid_width, grid_height, cell_si
             end
 
         end
+
+        -- lets set up a temp color for rendering. The color will be defined in HSV space
+        -- with elevation dictating the V and moisture dictating the H. Later will be converted to rgb for rendering.
+
+        -- Hue range is 30' to 120'
+        local hue = 30 + 90*sqr.moisture
+        local sat = 100
+        local brt = 200 * sqr.elevation^2
+        -- local brt = 1000 * math.abs(0.5 - sqr.elevation) * sqr.elevation
+        -- print(hue, sat, brt)
+        sqr.color = Utils.HSVtoRGB(hue, sat, brt)
     end
 
 
