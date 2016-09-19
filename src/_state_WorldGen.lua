@@ -25,6 +25,10 @@ local stime, ttime
 ------------------------------------------------
 function _state_WorldGen:init()
     stime = love.timer.getTime()
+    contents, size = love.filesystem.read( 'data/biomes.json')
+
+    data = json.decode(contents)
+    print(Inspect(data))
 
     map_obj = Map.generate_map(seed, grid_size, cell_size)
     GUI:init()
@@ -36,11 +40,21 @@ end
 function _state_WorldGen:draw()
 
     for id, sqr in pairs(map_obj) do
-        if sqr.biome == 'land' then
+        if sqr.geoType == 'land' then
             -- love.graphics.points(sqr.center.x, sqr.center.y)
             love.graphics.setColor(sqr.color.r, sqr.color.g, sqr.color.b)
-            love.graphics.rectangle('fill', sqr.vertices[1], sqr.vertices[2], cell_size, cell_size)
+            love.graphics.rectangle(sqr.fillType, sqr.vertices[1], sqr.vertices[2], cell_size, cell_size)
+        elseif sqr.geoType == 'coast' then
+            love.graphics.setColor(220, 190, 140)
+            love.graphics.rectangle(sqr.fillType, sqr.vertices[1], sqr.vertices[2], cell_size, cell_size)
+        elseif sqr.geoType == 'shallows' then
+            love.graphics.setColor(130, 210, 230)
+            love.graphics.rectangle(sqr.fillType, sqr.vertices[1], sqr.vertices[2], cell_size, cell_size)
+        elseif sqr.geoType == 'ocean' then
+            love.graphics.setColor(0, 130, 150)
+            love.graphics.rectangle(sqr.fillType, sqr.vertices[1], sqr.vertices[2], cell_size, cell_size)
         end
+
     end
 
     love.graphics.setColor(0, 0, 0)
@@ -66,6 +80,7 @@ function _state_WorldGen:mousepressed(x, y, button)
             print(Inspect(map_obj[g_coords.w .. "w" .. g_coords.h .. "h"]))
             -- print(Inspect(map_obj))
         end
+        map_obj[g_coords.w .. "w" .. g_coords.h .. "h"].fillType = "line"
     elseif button == 2 then
         print()
 

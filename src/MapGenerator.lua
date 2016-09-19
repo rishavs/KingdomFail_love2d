@@ -47,6 +47,7 @@ function MapGenerator.generate_map(seed, grid_size, cell_size)
 end
 
 function MapGenerator.generate_seed(s)
+    love.math.setRandomSeed(os.time())
     local seed_min = 1000
     local seed_max = 9999
 
@@ -179,9 +180,10 @@ function MapGenerator.set_biomes(map_biome_obj, grid_width, grid_height, cell_si
 
     for id, sqr in pairs(map_biome_obj) do
         if sqr.id_w == 1 or sqr.id_h == 1 or sqr.id_w == grid_width or sqr.id_h == grid_height then
-            sqr.biome = 'ocean'
+            sqr.geoType = 'ocean'
             sqr.cell_is_on_edge = true
             sqr.lum = 0
+            sqr.fillType = 'line'
         else
 
             local grid_pxl_width = grid_width * cell_size
@@ -194,19 +196,24 @@ function MapGenerator.set_biomes(map_biome_obj, grid_width, grid_height, cell_si
             local water_lvl = Utils.round((var_d + var_e * d_sqr ) , 2)
 
             if sqr.elevation < water_lvl then
-                sqr.lum = 0 -- here we can set elevation as ranom between 0 and water lvl when biomes is done
-                sqr.biome = "ocean"
+                sqr.geoType = "ocean"
+                sqr.lum = 0 -- here we can set elevation as ranom between 0 and water lvl when geoTypes is done
+                sqr.fillType = 'line'
             elseif sqr.elevation < water_lvl * 1.3 then
+                sqr.geoType = "shallows"
                 sqr.lum = math.min(Utils.round(0.1 * 255 ), 255)
-                sqr.biome = "shallows"
-            elseif sqr.elevation < water_lvl * 1.35 then
+                sqr.fillType = 'line'
+            elseif sqr.elevation < water_lvl * 1.35 and sqr.elevation <= 0.4 then
+                sqr.geoType = "coast"
                 sqr.lum = math.min(Utils.round(0.2 * 255 ), 255)
-                sqr.biome = "coast"
+                sqr.fillType = 'fill'
             else
-                sqr.biome = 'land'
+                sqr.geoType = 'land'
                 -- temp gradient value. will be removed when biomes are done
                 sqr.lum = math.min(Utils.round(sqr.elevation * 255 ), 255)
+                sqr.fillType = 'fill'
             end
+
 
         end
 
@@ -220,6 +227,7 @@ function MapGenerator.set_biomes(map_biome_obj, grid_width, grid_height, cell_si
         -- local brt = 1000 * math.abs(0.5 - sqr.elevation) * sqr.elevation
         -- print(hue, sat, brt)
         sqr.color = Utils.HSVtoRGB(hue, sat, brt)
+
     end
 
 
