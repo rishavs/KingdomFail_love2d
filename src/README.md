@@ -16,6 +16,8 @@ coves
 camera
 canvas
 
+GUI lib
+
 ::state change to gstate
 tileset
 jumper

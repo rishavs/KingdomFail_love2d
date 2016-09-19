@@ -122,9 +122,9 @@ end
 
 function MapGenerator.set_elevation_and_moisture (map_elv_n_mst_obj, grid_width, grid_height, cell_size)
 
-    local var_a = 0.2
-    local var_b = 0.9
-    local var_c = 1
+    local var_a = 0.5
+    local var_b = 500
+    local var_c = 0.6
 
     local min_calc_elv = Utils.round(((0 + var_a) * (1 - (var_b * 2 ^ var_c))), 2)
     local max_calc_elv = Utils.round(((1 + var_a) * (1 - (var_b * 0 ^ var_c))), 2)
@@ -176,46 +176,21 @@ end
 function MapGenerator.set_biomes(map_biome_obj, grid_width, grid_height, cell_size)
 
     local var_d = 0.25
-    local var_e = 0.1
+    local var_e = 0.05
 
     for id, sqr in pairs(map_biome_obj) do
-        if sqr.id_w == 1 or sqr.id_h == 1 or sqr.id_w == grid_width or sqr.id_h == grid_height then
+
+        if sqr.elevation == 0 then
             sqr.geoType = 'ocean'
-            sqr.cell_is_on_edge = true
-            sqr.lum = 0
+            sqr.fillType = 'line'
+        elseif sqr.elevation < 0.1 then
+            sqr.geoType = 'shallows'
             sqr.fillType = 'line'
         else
-
-            local grid_pxl_width = grid_width * cell_size
-            local grid_pxl_height = grid_height * cell_size
-
-            local dx = 2 * sqr.center.x / grid_pxl_width - 1
-            local dy = 2 * sqr.center.y / grid_pxl_height - 1
-            local d_sqr =  dx*dx + dy*dy
-
-            local water_lvl = Utils.round((var_d + var_e * d_sqr ) , 2)
-
-            if sqr.elevation < water_lvl then
-                sqr.geoType = "ocean"
-                sqr.lum = 0 -- here we can set elevation as ranom between 0 and water lvl when geoTypes is done
-                sqr.fillType = 'line'
-            elseif sqr.elevation < water_lvl * 1.3 then
-                sqr.geoType = "shallows"
-                sqr.lum = math.min(Utils.round(0.1 * 255 ), 255)
-                sqr.fillType = 'line'
-            elseif sqr.elevation < water_lvl * 1.35 and sqr.elevation <= 0.4 then
-                sqr.geoType = "coast"
-                sqr.lum = math.min(Utils.round(0.2 * 255 ), 255)
-                sqr.fillType = 'fill'
-            else
-                sqr.geoType = 'land'
-                -- temp gradient value. will be removed when biomes are done
-                sqr.lum = math.min(Utils.round(sqr.elevation * 255 ), 255)
-                sqr.fillType = 'fill'
-            end
-
-
+            sqr.geoType = 'land'
+            sqr.fillType = 'fill'
         end
+            --
 
         -- lets set up a temp color for rendering. The color will be defined in HSV space
         -- with elevation dictating the V and moisture dictating the H. Later will be converted to rgb for rendering.

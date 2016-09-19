@@ -19,6 +19,7 @@ grid_size = "M"
 map_obj = {}
 
 local stime, ttime
+local landArea = 0
 
 ------------------------------------------------
 -- State Definition: _state_WorldGen
@@ -30,7 +31,7 @@ function _state_WorldGen:init()
     data = json.decode(contents)
     print(Inspect(data))
 
-    map_obj = Map.generate_map(seed, grid_size, cell_size)
+    map_obj.grid = Map.generate_map(seed, grid_size, cell_size)
     GUI:init()
     HUD:init()
 
@@ -39,7 +40,7 @@ end
 
 function _state_WorldGen:draw()
 
-    for id, sqr in pairs(map_obj) do
+    for id, sqr in pairs(map_obj.grid) do
         if sqr.geoType == 'land' then
             -- love.graphics.points(sqr.center.x, sqr.center.y)
             love.graphics.setColor(sqr.color.r, sqr.color.g, sqr.color.b)
@@ -54,7 +55,10 @@ function _state_WorldGen:draw()
             love.graphics.setColor(0, 130, 150)
             love.graphics.rectangle(sqr.fillType, sqr.vertices[1], sqr.vertices[2], cell_size, cell_size)
         end
-
+        -- if sqr.elevation <= 0.3 then
+        --     love.graphics.setColor(200, 0, 0)
+        --     love.graphics.rectangle(sqr.fillType, sqr.vertices[1], sqr.vertices[2], cell_size, cell_size)
+        -- end
     end
 
     love.graphics.setColor(0, 0, 0)
@@ -77,10 +81,10 @@ function _state_WorldGen:mousepressed(x, y, button)
         if g_coords then
             print('Grid coords = ' .. g_coords.w .. ", " .. g_coords.h)
             print('Cell Details :')
-            print(Inspect(map_obj[g_coords.w .. "w" .. g_coords.h .. "h"]))
+            print(Inspect(map_obj.grid[g_coords.w .. "w" .. g_coords.h .. "h"]))
             -- print(Inspect(map_obj))
         end
-        map_obj[g_coords.w .. "w" .. g_coords.h .. "h"].fillType = "line"
+        map_obj.grid[g_coords.w .. "w" .. g_coords.h .. "h"].fillType = "line"
     elseif button == 2 then
         print()
 
@@ -92,7 +96,7 @@ function _state_WorldGen:keyreleased(key)
         Gamestate.switch(_state_MainMenu)
     elseif key == 'space' then
         seed = Map.generate_seed()
-        map_obj = Map.generate_map(seed, grid_size, cell_size)
+        map_obj.grid = Map.generate_map(seed, grid_size, cell_size)
     end
 end
 
