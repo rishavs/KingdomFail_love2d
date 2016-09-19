@@ -1,0 +1,102 @@
+{
+
+    "coast_sandy": {
+        "elevation": 0.5,
+        "moisture" : 0.2,
+        "velocity_modifier" : -1,
+        "temperature": 20,
+        "tiles" : [
+            "t1", "t2"
+        ]
+    },
+    "coast_rocky": {
+        "elevation": 0.5,
+        "moisture" : 0.2,
+        "velocity_modifier" : -1,
+        "temperature": 20,
+        "tiles" : [
+            "t1", "t2"
+        ]
+    },
+    "coast_cliff": {
+        "elevation": 0.5,
+        "moisture" : 0.2,
+        "velocity_modifier" : -1,
+        "temperature": 20,
+        "tiles" : [
+            "t1", "t2"
+        ]
+    },
+    "plains_arid": {
+        "elevation": 0.5,
+        "moisture" : 0.2,
+        "velocity_modifier" : -1,
+        "temperature": 20,
+        "tiles" : [
+            "t1", "t2"
+        ]
+    },
+    "plains_grassland": {
+        "elevation": 0.5,
+        "moisture" : 0.2,
+        "velocity_modifier" : -1,
+        "temperature": 20,
+        "tiles" : [
+            "t1", "t2"
+        ]
+    },
+    "plains_forest": {
+        "elevation": 0.5,
+        "moisture" : 0.2,
+        "velocity_modifier" : -1,
+        "temperature": 20,
+        "tiles" : [
+            "t1", "t2"
+        ]
+    },
+    "hills_brown": {
+        "elevation": 0.5,
+        "moisture" : 0.2,
+        "velocity_modifier" : -1,
+        "temperature": 20,
+        "tiles" : [
+            "t1", "t2"
+        ]
+    },
+    "hills_wood": {
+        "elevation": 0.5,
+        "moisture" : 0.2,
+        "velocity_modifier" : -1,
+        "temperature": 20,
+        "tiles" : [
+            "t1", "t2"
+        ]
+    },
+    "mountains_rocky": {
+        "elevation": 0.5,
+        "moisture" : 0.2,
+        "velocity_modifier" : -1,
+        "temperature": 20,
+        "tiles" : [
+            "t1", "t2"
+        ]
+    },
+    "mountains_meadow": {
+        "elevation": 0.5,
+        "moisture" : 0.2,
+        "velocity_modifier" : -1,
+        "temperature": 20,
+        "tiles" : [
+            "t1", "t2"
+        ]
+    },
+    "mountains_peaks": {
+        "elevation": 0.5,
+        "moisture" : 0.2,
+        "velocity_modifier" : -1,
+        "temperature": 20,
+        "tiles" : [
+            "t1", "t2"
+        ]
+    },
+}

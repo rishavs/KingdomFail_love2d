@@ -6,6 +6,7 @@ Gamestate = require "libs.hump.gamestate"
 Camera = require "libs.hump.camera"
 UI = require "libs.SUIT"
 Inspect = require 'libs.inspect.inspect'
+json = require 'libs.json.json'
 
 ------------------------------------------------
 -- Componants
