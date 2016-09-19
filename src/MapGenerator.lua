@@ -38,6 +38,8 @@ function MapGenerator.generate_map(seed, grid_size, cell_size)
     -- TODO: merge all seprate functions in a single for loop
     -- Generate the grid
     temp_map_obj = MapGenerator.generate_sqr_grid(grid_width, grid_height, cell_size)
+    -- set neighbour info for each cell
+    temp_map_obj = MapGenerator.set_neighbours(temp_map_obj)
     -- set the evevation and moisture
     temp_map_obj = MapGenerator.set_elevation_and_moisture(temp_map_obj, grid_width, grid_height, cell_size)
     -- set up the basic biomes
@@ -175,9 +177,6 @@ end
 
 function MapGenerator.set_biomes(map_biome_obj, grid_width, grid_height, cell_size)
 
-    local var_d = 0.25
-    local var_e = 0.05
-
     for id, sqr in pairs(map_biome_obj) do
 
         if sqr.elevation == 0 then
@@ -186,6 +185,9 @@ function MapGenerator.set_biomes(map_biome_obj, grid_width, grid_height, cell_si
         elseif sqr.elevation < 0.1 then
             sqr.geoType = 'shallows'
             sqr.fillType = 'line'
+        -- elseif sqr.elevation > 0.4    then
+        --     sqr.geoType = 'mountains'
+        --     sqr.fillType = 'fill'
         else
             sqr.geoType = 'land'
             sqr.fillType = 'fill'
@@ -196,17 +198,124 @@ function MapGenerator.set_biomes(map_biome_obj, grid_width, grid_height, cell_si
         -- with elevation dictating the V and moisture dictating the H. Later will be converted to rgb for rendering.
 
         -- Hue range is 30' to 120'
-        local hue = 30 + 90*sqr.moisture
+        local hue = 30 + 90 * sqr.moisture
         local sat = 100
-        local brt = 200 * sqr.elevation^2
-        -- local brt = 1000 * math.abs(0.5 - sqr.elevation) * sqr.elevation
-        -- print(hue, sat, brt)
+        local brt = 30 + 200 * sqr.elevation^2 -- no logic here. just trial and error to get a formula which looks good
+
         sqr.color = Utils.HSVtoRGB(hue, sat, brt)
 
     end
 
 
     return map_biome_obj
+end
+
+function MapGenerator.set_neighbours(grid_obj)
+    print('xxx')
+    for id, sqr in pairs(grid_obj) do
+        local sqr_nbr = {}
+        local diag_nbr = {}
+
+        local w = sqr.id_w
+        local h = sqr.id_h
+
+        local snb1, snb2, snb3, snb4
+        snb1 = w ..'w' .. (h-1) .. 'h'
+        snb2 = (w+1) ..'w' .. h .. 'h'
+        snb3 = w ..'w' .. (h+1) .. 'h'
+        snb4 = (w-1) ..'w' .. h .. 'h'
+
+        if grid_obj[snb1] then
+            table.insert(sqr_nbr, snb1)
+        end
+        if grid_obj[snb2] then
+            table.insert(sqr_nbr, snb2)
+        end
+        if grid_obj[snb3] then
+            table.insert(sqr_nbr, snb3)
+        end
+        if grid_obj[snb4] then
+            table.insert(sqr_nbr, snb4)
+        end
+
+        local dnb1, dnb2, dnb3, dnb4
+        dnb1 = (w+1) ..'w' .. (h-1) .. 'h'
+        dnb2 = (w+1) ..'w' .. (h+1) .. 'h'
+        dnb3 = (w-1) ..'w' .. (h+1) .. 'h'
+        dnb4 = (w-1) ..'w' .. (h-1) .. 'h'
+
+        if grid_obj[dnb1] then
+            table.insert(diag_nbr, dnb1)
+        end
+        if grid_obj[dnb2] then
+            table.insert(diag_nbr, dnb2)
+        end
+        if grid_obj[dnb3] then
+            table.insert(diag_nbr, dnb3)
+        end
+        if grid_obj[dnb4] then
+            table.insert(diag_nbr, dnb4)
+        end
+
+        sqr.sqr_nbr = sqr_nbr
+        sqr.diag_nbr = diag_nbr
+    end
+
+    return grid_obj
+end
+
+function MapGenerator.get_grid_neighbours(id, grid_obj)
+    local neighbours = {}
+    neighbours.sqr_nbr = {}
+    neighbours.diag_nbr = {}
+    neighbours.elv_mst_data_nbr = {}
+
+    local w = grid_obj[id].id_w
+    local h = grid_obj[id].id_h
+
+    local snb1, snb2, snb3, snb4
+    snb1 = w ..'w' .. (h-1) .. 'h'
+    snb2 = (w+1) ..'w' .. h .. 'h'
+    snb3 = w ..'w' .. (h+1) .. 'h'
+    snb4 = (w-1) ..'w' .. h .. 'h'
+
+    if grid_obj[snb1] then
+        table.insert(neighbours.sqr_nbr, snb1)
+    end
+    if grid_obj[snb2] then
+        table.insert(neighbours.sqr_nbr, snb2)
+    end
+    if grid_obj[snb3] then
+        table.insert(neighbours.sqr_nbr, snb3)
+    end
+    if grid_obj[snb4] then
+        table.insert(neighbours.sqr_nbr, snb4)
+    end
+
+    local dnb1, dnb2, dnb3, dnb4
+    dnb1 = (w+1) ..'w' .. (h-1) .. 'h'
+    dnb2 = (w+1) ..'w' .. (h+1) .. 'h'
+    dnb3 = (w-1) ..'w' .. (h+1) .. 'h'
+    dnb4 = (w-1) ..'w' .. (h-1) .. 'h'
+
+    if grid_obj[dnb1] then
+        table.insert(neighbours.diag_nbr, dnb1)
+    end
+    if grid_obj[dnb2] then
+        table.insert(neighbours.diag_nbr, dnb2)
+    end
+    if grid_obj[dnb3] then
+        table.insert(neighbours.diag_nbr, dnb3)
+    end
+    if grid_obj[dnb4] then
+        table.insert(neighbours.diag_nbr, dnb4)
+    end
+
+    return neighbours
+end
+
+function MapGenerator.generate_rivers()
+
 end
 
 return MapGenerator

@@ -26,10 +26,10 @@ local landArea = 0
 ------------------------------------------------
 function _state_WorldGen:init()
     stime = love.timer.getTime()
-    contents, size = love.filesystem.read( 'data/biomes.json')
+    -- contents, size = love.filesystem.read( 'data/biomes.json')
 
-    data = json.decode(contents)
-    print(Inspect(data))
+    -- data = json.decode(contents)
+    -- print(Inspect(data))
 
     map_obj.grid = Map.generate_map(seed, grid_size, cell_size)
     GUI:init()
@@ -42,19 +42,17 @@ function _state_WorldGen:draw()
 
     for id, sqr in pairs(map_obj.grid) do
         if sqr.geoType == 'land' then
-            -- love.graphics.points(sqr.center.x, sqr.center.y)
             love.graphics.setColor(sqr.color.r, sqr.color.g, sqr.color.b)
-            love.graphics.rectangle(sqr.fillType, sqr.vertices[1], sqr.vertices[2], cell_size, cell_size)
+        elseif sqr.geoType == 'mountains' then
+            love.graphics.setColor(200, 200, 200)
         elseif sqr.geoType == 'coast' then
             love.graphics.setColor(220, 190, 140)
-            love.graphics.rectangle(sqr.fillType, sqr.vertices[1], sqr.vertices[2], cell_size, cell_size)
         elseif sqr.geoType == 'shallows' then
             love.graphics.setColor(130, 210, 230)
-            love.graphics.rectangle(sqr.fillType, sqr.vertices[1], sqr.vertices[2], cell_size, cell_size)
         elseif sqr.geoType == 'ocean' then
             love.graphics.setColor(0, 130, 150)
-            love.graphics.rectangle(sqr.fillType, sqr.vertices[1], sqr.vertices[2], cell_size, cell_size)
         end
+        love.graphics.rectangle(sqr.fillType, sqr.vertices[1], sqr.vertices[2], cell_size, cell_size)
         -- if sqr.elevation <= 0.3 then
         --     love.graphics.setColor(200, 0, 0)
         --     love.graphics.rectangle(sqr.fillType, sqr.vertices[1], sqr.vertices[2], cell_size, cell_size)
@@ -81,8 +79,13 @@ function _state_WorldGen:mousepressed(x, y, button)
         if g_coords then
             print('Grid coords = ' .. g_coords.w .. ", " .. g_coords.h)
             print('Cell Details :')
-            print(Inspect(map_obj.grid[g_coords.w .. "w" .. g_coords.h .. "h"]))
+            local gid = g_coords.w .. "w" .. g_coords.h .. "h"
+            print(Inspect(map_obj.grid[gid]))
             -- print(Inspect(map_obj))
+            local nbr = map_obj.grid[gid].sqr_nbr
+            for _, nhr in pairs(nbr) do
+                map_obj.grid[nhr].fillType = 'line'
+            end
         end
         map_obj.grid[g_coords.w .. "w" .. g_coords.h .. "h"].fillType = "line"
     elseif button == 2 then
