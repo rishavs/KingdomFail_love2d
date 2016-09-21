@@ -1,12 +1,17 @@
 TODO:
 Biome Definition
 
-rivers
+rivers types:
+    major - starts from mountains
+    minor - starts from hills
+river attr:
+        velocity - based on height. defines length
+river parts:
     origin
     young
     mature
     old
-    mouth (based on river length)
+    mouth (based on river length)/lake/marsh
 valleys
 lakes
 marshes

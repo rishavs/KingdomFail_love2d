@@ -30,7 +30,7 @@ function love.load()
     love.math.setRandomSeed(os.time())
 
     Gamestate.registerEvents()
-    Gamestate.switch(_state_MainMenu)
+    Gamestate.switch(_state_WorldGen)
 end
 
 function love.quit()

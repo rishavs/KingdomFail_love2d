@@ -18,6 +18,8 @@ grid_size = "M"
 
 map_obj = {}
 
+river_origin = {}
+
 local stime, ttime
 local landArea = 0
 
@@ -89,7 +91,7 @@ function _state_WorldGen:mousepressed(x, y, button)
         end
         map_obj.grid[g_coords.w .. "w" .. g_coords.h .. "h"].fillType = "line"
     elseif button == 2 then
-        print()
+
 
     end
 end

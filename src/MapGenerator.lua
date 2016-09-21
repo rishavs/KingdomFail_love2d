@@ -44,6 +44,8 @@ function MapGenerator.generate_map(seed, grid_size, cell_size)
     temp_map_obj = MapGenerator.set_elevation_and_moisture(temp_map_obj, grid_width, grid_height, cell_size)
     -- set up the basic biomes
     temp_map_obj = MapGenerator.set_biomes(temp_map_obj, grid_width, grid_height, cell_size)
+    -- setup rivers
+    temp_map_obj = MapGenerator.generate_rivers(temp_map_obj)
 
     return temp_map_obj
 end
@@ -125,8 +127,10 @@ end
 function MapGenerator.set_elevation_and_moisture (map_elv_n_mst_obj, grid_width, grid_height, cell_size)
 
     local var_a = 0.5
-    local var_b = 500
-    local var_c = 0.6
+    local var_b = 0.3
+    local var_c = 1
+    local var_d = 2
+
 
     local min_calc_elv = Utils.round(((0 + var_a) * (1 - (var_b * 2 ^ var_c))), 2)
     local max_calc_elv = Utils.round(((1 + var_a) * (1 - (var_b * 0 ^ var_c))), 2)
@@ -143,6 +147,7 @@ function MapGenerator.set_elevation_and_moisture (map_elv_n_mst_obj, grid_width,
         local dx = 2 * sqr.center.x / grid_pxl_width - 1
         local dy = 2 * sqr.center.y / grid_pxl_height - 1
         local d_sqr =  dx*dx + dy*dy
+        local m_dist = 2 * math.max(math.abs(dx), math.abs(dy))
 
         local elv_merged_noise =
               1.00 * love.math.noise (  1 * (dx + seed),   1 * (dy + seed))
@@ -154,9 +159,13 @@ function MapGenerator.set_elevation_and_moisture (map_elv_n_mst_obj, grid_width,
             + 0.02 * love.math.noise ( 64 * (dx + seed),  64 * (dy + seed))
             + 0.01 * love.math.noise (128 * (dx + seed), 128 * (dy + seed))
 
-        local elevation = ((elv_merged_noise/2 + var_a) * (1 - (var_b * d_sqr^var_c)))
+        elv_merged_noise = (elv_merged_noise ^ var_d)/2
+
+        local elevation = ((elv_merged_noise + var_a) * (1 - (var_b * m_dist^var_c)))
+
         sqr.elevation = Utils.round(Utils.normalize(elevation, min_calc_elv, max_calc_elv), 2)
 
+        -- print(sqr.elevation)
         local mst_merged_noise =
               1.00 * love.math.noise (  1 * (dx + mst_seed),   1 * (dy + mst_seed))
             + 0.50 * love.math.noise (  2 * (dx + mst_seed),   2 * (dy + mst_seed))
@@ -176,18 +185,28 @@ function MapGenerator.set_elevation_and_moisture (map_elv_n_mst_obj, grid_width,
 end
 
 function MapGenerator.set_biomes(map_biome_obj, grid_width, grid_height, cell_size)
+    local var_e = 0.05
+    local var_f = 0.4
+
+    local grid_pxl_width = grid_width * cell_size
+    local grid_pxl_height = grid_height * cell_size
 
     for id, sqr in pairs(map_biome_obj) do
 
-        if sqr.elevation == 0 then
+        local dx = 2 * sqr.center.x / grid_pxl_width - 1
+        local dy = 2 * sqr.center.y / grid_pxl_height - 1
+        local d_sqr =  dx*dx + dy*dy
+
+        local wtr_lvl =var_e + var_f * d_sqr
+
+        if sqr.elevation < wtr_lvl then
+            sqr.elevation = 0
             sqr.geoType = 'ocean'
             sqr.fillType = 'line'
-        elseif sqr.elevation < 0.1 then
+        elseif sqr.elevation < wtr_lvl * 1.2 then
             sqr.geoType = 'shallows'
             sqr.fillType = 'line'
-        -- elseif sqr.elevation > 0.4    then
-        --     sqr.geoType = 'mountains'
-        --     sqr.fillType = 'fill'
+
         else
             sqr.geoType = 'land'
             sqr.fillType = 'fill'
@@ -199,8 +218,9 @@ function MapGenerator.set_biomes(map_biome_obj, grid_width, grid_height, cell_si
 
         -- Hue range is 30' to 120'
         local hue = 30 + 90 * sqr.moisture
+        -- local hue = 30
         local sat = 100
-        local brt = 30 + 200 * sqr.elevation^2 -- no logic here. just trial and error to get a formula which looks good
+        local brt = 30 + 200 * sqr.elevation ^ 2 -- no logic here. just trial and error to get a formula which looks good
 
         sqr.color = Utils.HSVtoRGB(hue, sat, brt)
 
@@ -211,7 +231,6 @@ function MapGenerator.set_biomes(map_biome_obj, grid_width, grid_height, cell_si
 end
 
 function MapGenerator.set_neighbours(grid_obj)
-    print('xxx')
     for id, sqr in pairs(grid_obj) do
         local sqr_nbr = {}
         local diag_nbr = {}
@@ -314,8 +333,31 @@ function MapGenerator.get_grid_neighbours(id, grid_obj)
     return neighbours
 end
 
-function MapGenerator.generate_rivers()
+function MapGenerator.generate_rivers(grid_rvr_obj)
+    local cur_w = 100
+    local cur_h = 75
+    local cur_id = cur_w .. 'w' .. cur_h .. 'h'
 
+    local lowest_elv = 1
+    local lowest_cell
+
+    -- find the neighbours of the current one
+    while grid_rvr_obj[cur_id].geoType ~= 'shallows' do
+        grid_rvr_obj[cur_id].geoType = 'shallows'
+
+        local nbrs = grid_rvr_obj[cur_id].sqr_nbr
+        for i, nb in ipairs(nbrs) do
+            if grid_rvr_obj[nb].elevation < lowest_elv then
+                lowest_elv = grid_rvr_obj[nb].elevation
+                lowest_cell = nb
+            end
+
+        end
+        cur_id = lowest_cell
+    end
+
+
+    return grid_rvr_obj
 end
 
 return MapGenerator
