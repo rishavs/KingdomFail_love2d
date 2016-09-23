@@ -49,6 +49,8 @@ function _state_WorldGen:draw()
             love.graphics.setColor(200, 200, 200)
         elseif sqr.geoType == 'coast' then
             love.graphics.setColor(220, 190, 140)
+        elseif sqr.geoType == 'freshwater' then
+            love.graphics.setColor(0, 130, 150)
         elseif sqr.geoType == 'shallows' then
             love.graphics.setColor(130, 210, 230)
         elseif sqr.geoType == 'ocean' then

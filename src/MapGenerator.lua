@@ -127,13 +127,15 @@ end
 function MapGenerator.set_elevation_and_moisture (map_elv_n_mst_obj, grid_width, grid_height, cell_size)
 
     local var_a = 0.5
-    local var_b = 0.3
+    local var_b = 0.4
     local var_c = 1
     local var_d = 2
 
 
     local min_calc_elv = Utils.round(((0 + var_a) * (1 - (var_b * 2 ^ var_c))), 2)
-    local max_calc_elv = Utils.round(((1 + var_a) * (1 - (var_b * 0 ^ var_c))), 2)
+    local max_calc_elv = Utils.round(((1 + var_a) * (1 - (var_b * (-1) ^ var_c))), 2)
+    print('Min elv = ' .. min_calc_elv)
+    print('Max elv = ' .. max_calc_elv)
 
     -- will have to create the moisture seed as a function of the global seed
     love.math.setRandomSeed(seed)
@@ -147,7 +149,7 @@ function MapGenerator.set_elevation_and_moisture (map_elv_n_mst_obj, grid_width,
         local dx = 2 * sqr.center.x / grid_pxl_width - 1
         local dy = 2 * sqr.center.y / grid_pxl_height - 1
         local d_sqr =  dx*dx + dy*dy
-        local m_dist = 2 * math.max(math.abs(dx), math.abs(dy))
+        local m_dist = math.max(math.abs(dx), math.abs(dy))
 
         local elv_merged_noise =
               1.00 * love.math.noise (  1 * (dx + seed),   1 * (dy + seed))
@@ -197,21 +199,20 @@ function MapGenerator.set_biomes(map_biome_obj, grid_width, grid_height, cell_si
         local dy = 2 * sqr.center.y / grid_pxl_height - 1
         local d_sqr =  dx*dx + dy*dy
 
-        local wtr_lvl =var_e + var_f * d_sqr
+        local sea_lvl =var_e + var_f * d_sqr
 
-        if sqr.elevation < wtr_lvl then
+        if sqr.elevation < sea_lvl then
             sqr.elevation = 0
             sqr.geoType = 'ocean'
             sqr.fillType = 'line'
-        elseif sqr.elevation < wtr_lvl * 1.2 then
+        elseif sqr.elevation < sea_lvl * 1.5 then
+            sqr.elevation = 0
             sqr.geoType = 'shallows'
             sqr.fillType = 'line'
-
         else
             sqr.geoType = 'land'
             sqr.fillType = 'fill'
         end
-            --
 
         -- lets set up a temp color for rendering. The color will be defined in HSV space
         -- with elevation dictating the V and moisture dictating the H. Later will be converted to rgb for rendering.
@@ -334,28 +335,73 @@ function MapGenerator.get_grid_neighbours(id, grid_obj)
 end
 
 function MapGenerator.generate_rivers(grid_rvr_obj)
-    local cur_w = 100
-    local cur_h = 75
-    local cur_id = cur_w .. 'w' .. cur_h .. 'h'
 
-    local lowest_elv = 1
-    local lowest_cell
+    -- parameter governing rivers
+    local origin, meander_val, broaden_val, volume_val
+    --for the sake of testing, find the highest point in the grid
+    local highest_cell
+    local highest_elv = 0.7
 
-    -- find the neighbours of the current one
+    for id, sqr in pairs(grid_rvr_obj) do
+        -- just skip anyting less than .7
+        if sqr.elevation > highest_elv then
+            highest_cell = id
+            highest_elv = sqr.elevation
+        end
+
+    end
+    print("Highest Point = " .. highest_cell)
+    print("Highest Elv = " .. highest_elv)
+
+    local cur_id = highest_cell
+    local cur_elv = highest_elv
+    local nxt_id
+    local nxt_elv
+
+    -- run loop till river reaches the coast
     while grid_rvr_obj[cur_id].geoType ~= 'shallows' do
+
         grid_rvr_obj[cur_id].geoType = 'shallows'
 
-        local nbrs = grid_rvr_obj[cur_id].sqr_nbr
-        for i, nb in ipairs(nbrs) do
-            if grid_rvr_obj[nb].elevation < lowest_elv then
-                lowest_elv = grid_rvr_obj[nb].elevation
-                lowest_cell = nb
+        -- get the neighbours of the current cell
+        local nbr = grid_rvr_obj[cur_id].sqr_nbr
+
+        local lowest_elv = grid_rvr_obj[cur_id].elevation
+
+        -- find the lowest elevation cell which is the neighbour to teh current cell
+        for i, id in ipairs(nbr) do
+            if grid_rvr_obj[id].elevation < lowest_elv then
+                lowest_cell = id
+                lowest_elv = grid_rvr_obj[id].elevation
             end
-
         end
-        cur_id = lowest_cell
-    end
 
+        -- If the evevation of the lowest neighbour is lower than the current cells elevation
+        -- then set this neighbour as the next cell to be turned to river
+        if lowest_elv < grid_rvr_obj[cur_id].elevation then
+            cur_id = lowest_cell
+        else
+            -- in case where the next cell elevation is not smaller than current cell, we cant rely on gravity to
+            -- define the water flow. in such cases, we will take the farthest cell from the starting point as the next cell.
+
+            -- find the furthest cell from current cell
+            local furthest_dist = 0
+            local furthest_cell
+            for i, id in ipairs(nbr) do
+                local nbr_dist = math.sqrt(
+                      (grid_rvr_obj[highest_cell].id_w - grid_rvr_obj[id].id_w)^2
+                    + (grid_rvr_obj[highest_cell].id_h - grid_rvr_obj[id].id_h)^2
+                )
+                if nbr_dist > furthest_dist then
+                    furthest_dist = nbr_dist
+                    furthest_cell = id
+                end
+            end
+            lowest_cell = furthest_cell
+            cur_id = lowest_cell
+            print("lode lag gaye.")
+        end
+    end
 
     return grid_rvr_obj
 end
